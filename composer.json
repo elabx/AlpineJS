@@ -1,15 +1,15 @@
 {
   "name": "elabx/modulejs-alpine",
-  "description": "Field to setup recurring dates using RRule",
+  "description": "Add AlpineJS to ProcessWire admin",
   "type": "pw-module",
-  "keywords": ["processwire", "seo", "metatags", "sitemap"],
+  "keywords": ["processwire"],
   "homepage": "https://github.com/elabx/AlpineJS",
   "license": "MIT",
   "authors": [
     {
       "name": "Eduardo San Miguel Garcia",
       "email": "abx88as@gmail.com",
-      "homepage": "https://github.com/elabx"
+      "homepage": "https://github.com/elabx/AlpineJS"
     }
   ],
   "require": {
