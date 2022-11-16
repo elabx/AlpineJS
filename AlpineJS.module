@@ -1,28 +1,27 @@
 <?php namespace ProcessWire;
 
-/**
- * Class AlpineJS
- *
- */
+class AlpineJS extends ModuleJS implements Module
+{
 
-class AlpineJS extends ModuleJS implements Module {
+	public static function getModuleInfo()
+	{
+		return array(
+			'title'   => 'Alpine.js',
+			'version' => 001,
+			'href'    => 'https://github.com/elabx/AlpineJS',
+		);
+	}
 
-		public static function getModuleInfo() {
-				return array(
-					'title' => 'Alpine.js',
-					'version' => 001,
-					'href' => 'http://alpinejs.dev',
-				);
-		}
+	public function getVersionUrl()
+	{
+		$class = $this->className();
+		return "{$this->config->urls->$class}alpinejs/{$this->version}/alpine.js";
+	}
 
-		public function getVersionUrl(){
-				$class = $this->className();
-				return "{$this->config->urls->$class}alpinejs/{$this->version}/alpine.js";
-		}
-
-		public function init() {
-				$config = $this->config;
-				$config->scripts->add($this->getVersionUrl(), ['defer' => true]);
-		}
+	public function init()
+	{
+		$config = $this->config;
+		$config->scripts->add($this->getVersionUrl(), ['defer' => true]);
+	}
 
 }
