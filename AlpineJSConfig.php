@@ -19,7 +19,7 @@ class AlpineJSConfig extends ModuleConfig
 		foreach ($versions as $i => $version) {
 			$version = rtrim($version, "/");
 			$versions[$i] = $version;
-			$f->addOption(rtrim($version, "/"));
+			$f->addOption($version);
 		}
 		$f->attr('value', isset($this->version) ? $this->version : $versions[0]);
 		$inputfields->add($f);
