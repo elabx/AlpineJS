@@ -1,5 +1,5 @@
 {
-  "name": "elabx/modulejs-alpine",
+  "name": "elabx/modulejs-alpinejs",
   "description": "Add AlpineJS to ProcessWire admin",
   "type": "pw-module",
   "keywords": ["processwire"],
@@ -9,10 +9,11 @@
     {
       "name": "Eduardo San Miguel Garcia",
       "email": "abx88as@gmail.com",
-      "homepage": "https://github.com/elabx/AlpineJS"
+      "homepage": "https://github.com/elabx"
     }
   ],
   "require": {
-    "wireframe-framework/processwire-composer-installer": "^1.1"
+    "wireframe-framework/processwire-composer-installer": "^1.1",
+    "php": ">=7.3"
   }
 }

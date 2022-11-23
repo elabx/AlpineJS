@@ -21,7 +21,9 @@ class AlpineJS extends ModuleJS implements Module
 	public function init()
 	{
 		$config = $this->config;
-		$config->scripts->add($this->getVersionUrl(), ['defer' => true]);
+		$this->wire()->adminTheme->addExtraMarkup('head', "<script src='{$this->getVersionUrl()}' defer></script>");
+		//$config->scripts->add($this->getVersionUrl(), ['defer' => true]);
+		//$config->scripts->add($this->getVersionUrl(), "defer");
 	}
 
 }
