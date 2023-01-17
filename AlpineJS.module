@@ -3,27 +3,72 @@
 class AlpineJS extends ModuleJS implements Module
 {
 
-	public static function getModuleInfo()
-	{
-		return array(
-			'title'   => 'Alpine.js',
-			'version' => 001,
-			'href'    => 'https://github.com/elabx/AlpineJS',
-		);
-	}
+		public static function getModuleInfo()
+		{
+				return array(
+					'title'   => 'Alpine.js',
+					'version' => 001,
+					'href'    => 'https://github.com/elabx/AlpineJS',
+				);
+		}
 
-	public function getVersionUrl()
-	{
-		$class = $this->className();
-		return "{$this->config->urls->$class}alpinejs/{$this->version}/alpine.js";
-	}
+		// Update when https://github.com/processwire/processwire/pull/210 is merged
 
-	public function init()
-	{
-		$config = $this->config;
-		$this->wire()->adminTheme->addExtraMarkup('head', "<script src='{$this->getVersionUrl()}' defer></script>");
-		//$config->scripts->add($this->getVersionUrl(), ['defer' => true]);
-		//$config->scripts->add($this->getVersionUrl(), "defer");
-	}
+		public function url($path)
+		{
+				$path = $this->path($path);
+				$config = $this->wire->config;
+				return str_replace($config->paths->root, $config->urls->root, $path);
+		}
+
+		/**
+		 * Given any file or directory path or url convert it to an absolute path
+		 * @param string $path
+		 * @return string
+		 */
+		public function path($path)
+		{
+				$path = Paths::normalizeSeparators($path);
+				$config = $this->wire->config;
+				if (strpos($path, $config->paths->root) !== 0) {
+						// path is not within pw root
+						// so we assume it is a relative path and add the pw root
+						$url = ltrim($path, "/");
+						$path = $config->paths->root . $url;
+				}
+				return $path;
+		}
+
+		public function getVersionUrl()
+		{
+				$class = $this->className();
+				$versions_path = "{$this->config->paths->$class}alpinejs/";
+
+
+				//bd($versions_path);
+				if (!$this->version) {
+						$files = $this->files->find($versions_path, [
+							'recursive'      => 1,
+							'allowDirs'      => true,
+							'returnRelative' => true
+						]);
+						//bd($files);
+						if (count($files)) {
+								$last_version_directory = end($files);
+								$version_url =  "{$this->config->urls->$class}alpinejs/". $last_version_directory . "alpine.js";
+								return $version_url;
+						}
+				} else {
+						return "{$this->config->urls->$class}alpinejs/{$this->version}/alpine.js";
+				}
+		}
+
+		public function init()
+		{
+				$config = $this->config;
+				$this->wire()->adminTheme->addExtraMarkup('head', "<script src='{$this->getVersionUrl()}' defer></script>");
+				//$config->scripts->add($this->getVersionUrl(), ['defer' => true]);
+				//$config->scripts->add($this->getVersionUrl(), "defer");
+		}
 
 }
