@@ -12,7 +12,18 @@ class AlpineJS extends ModuleJS implements Module
 				);
 		}
 
-		// Update when https://github.com/processwire/processwire/pull/210 is merged
+
+    public function init()
+    {
+        $config = $this->config;
+        bd($this->page->template);
+        if( $this->page->template == "admin") {
+            $this->wire()->adminTheme->addExtraMarkup('head', "<script src='{$this->getVersionUrl()}' defer></script>");
+        }
+    }
+
+
+    // Update when https://github.com/processwire/processwire/pull/210 is merged
 
 		public function url($path)
 		{
@@ -44,7 +55,6 @@ class AlpineJS extends ModuleJS implements Module
 				$class = $this->className();
 				$versions_path = "{$this->config->paths->$class}alpinejs/";
 
-
 				//bd($versions_path);
 				if (!$this->version) {
 						$files = $this->files->find($versions_path, [
@@ -61,14 +71,6 @@ class AlpineJS extends ModuleJS implements Module
 				} else {
 						return "{$this->config->urls->$class}alpinejs/{$this->version}/alpine.js";
 				}
-		}
-
-		public function init()
-		{
-				$config = $this->config;
-				$this->wire()->adminTheme->addExtraMarkup('head', "<script src='{$this->getVersionUrl()}' defer></script>");
-				//$config->scripts->add($this->getVersionUrl(), ['defer' => true]);
-				//$config->scripts->add($this->getVersionUrl(), "defer");
 		}
 
 }

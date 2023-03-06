@@ -1,5 +1,5 @@
 {
-  "name": "elabx/modulejs-alpinejs",
+  "name": "elabx/processwire-alpinejs",
   "description": "Add AlpineJS to ProcessWire admin",
   "type": "pw-module",
   "keywords": ["processwire"],
