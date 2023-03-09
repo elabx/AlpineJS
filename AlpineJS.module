@@ -16,7 +16,6 @@ class AlpineJS extends ModuleJS implements Module
     public function init()
     {
         $config = $this->config;
-        bd($this->page->template);
         if( $this->page->template == "admin") {
             $this->wire()->adminTheme->addExtraMarkup('head', "<script src='{$this->getVersionUrl()}' defer></script>");
         }
@@ -54,15 +53,14 @@ class AlpineJS extends ModuleJS implements Module
 		{
 				$class = $this->className();
 				$versions_path = "{$this->config->paths->$class}alpinejs/";
-
-				//bd($versions_path);
+    
 				if (!$this->version) {
 						$files = $this->files->find($versions_path, [
 							'recursive'      => 1,
 							'allowDirs'      => true,
 							'returnRelative' => true
 						]);
-						//bd($files);
+						
 						if (count($files)) {
 								$last_version_directory = end($files);
 								$version_url =  "{$this->config->urls->$class}alpinejs/". $last_version_directory . "alpine.js";
