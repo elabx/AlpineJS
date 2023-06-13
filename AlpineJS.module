@@ -7,7 +7,7 @@ class AlpineJS extends ModuleJS implements Module
 		{
 				return array(
 					'title'   => 'Alpine.js',
-					'version' => 001,
+					'version' => 002,
 					'href'    => 'https://github.com/elabx/AlpineJS',
 				);
 		}
