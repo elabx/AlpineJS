@@ -13,7 +13,7 @@ class AlpineJS extends ModuleJS implements Module
 		}
 
 
-    public function ready()
+    public function init()
     {
         $config = $this->config;
         if( $this->page->template == "admin") {
