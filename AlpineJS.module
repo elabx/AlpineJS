@@ -7,13 +7,14 @@ class AlpineJS extends ModuleJS implements Module
 		{
 				return array(
 					'title'   => 'Alpine.js',
-					'version' => 002,
+					'version' => 005,
 					'href'    => 'https://github.com/elabx/AlpineJS',
+          'autoload' => true
 				);
 		}
 
 
-    public function init()
+    public function ready()
     {
         $config = $this->config;
         if( $this->page->template == "admin") {
