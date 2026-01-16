@@ -1,75 +1,179 @@
-<?php namespace ProcessWire;
+<?php
+namespace ProcessWire;
 
-class AlpineJS extends ModuleJS implements Module
+class AlpineJS extends WireData implements Module
 {
 
-		public static function getModuleInfo()
-		{
-				return array(
-					'title'   => 'Alpine.js',
-					'version' => 005,
-					'href'    => 'https://github.com/elabx/AlpineJS',
-          'autoload' => true
-				);
-		}
+    /**
+     * Module information
+     */
+    public static function getModuleInfo()
+    {
+        return [
+            'title' => 'AlpineJS',
+            'summary' => 'Integrates Alpine.js locally into ProcessWire Admin with 1-click updates.',
+            'version' => '006',
+            'author' => 'elabx',
+            'href' => 'https://github.com/elabx/AlpineJS',
+            'autoload' => true,
+            'singular' => true,
+        ];
+    }
 
+    /**
+     * List of official AlpineJS plugins with their CDN filenames
+     */
+    protected static $pluginsList = [
+        'mask' => 'cdn.min.js', // @alpinejs/mask
+        'intersect' => 'cdn.min.js',
+        'persist' => 'cdn.min.js',
+        'focus' => 'cdn.min.js',
+        'collapse' => 'cdn.min.js',
+        'morph' => 'cdn.min.js',
+        'history' => 'cdn.min.js',
+    ];
 
+    /**
+     * Path to the JS storage directory inside the module
+     */
+    protected function getJsPath()
+    {
+        return $this->wire('config')->paths->AlpineJS . 'js/';
+    }
+
+    /**
+     * URL to the JS storage directory
+     */
+    protected function getJsUrl()
+    {
+        return $this->wire('config')->urls->AlpineJS . 'js/';
+    }
+
+    /**
+     * Ready method to attach hooks
+     */
     public function ready()
     {
-        $config = $this->config;
-        if( $this->page->template == "admin") {
-            $this->wire()->adminTheme->addExtraMarkup('head', "<script src='{$this->getVersionUrl()}' defer></script>");
+        if ($this->wire('page')->template->name === 'admin') {
+            $this->addScriptsToAdmin();
         }
     }
 
+    /**
+     * Add scripts to ProcessWire Admin
+     */
+    protected function addScriptsToAdmin()
+    {
+        // 1. Load Plugins first
+        if (is_array($this->activePlugins)) {
+            foreach ($this->activePlugins as $plugin) {
+                $file = "alpine-{$plugin}.min.js";
+                if (file_exists($this->getJsPath() . $file)) {
+                    $this->wire('config')->scripts->add($this->getJsUrl() . $file . "?v=" . $this->installedVersion);
+                }
+            }
+        }
 
-    // Update when https://github.com/processwire/processwire/pull/210 is merged
+        // 2. Load Core AlpineJS
+        if (file_exists($this->getJsPath() . "alpine.min.js")) {
+            $this->wire('config')->scripts->add($this->getJsUrl() . "alpine.min.js?v=" . $this->installedVersion);
+        }
+    }
 
-		public function url($path)
-		{
-				$path = $this->path($path);
-				$config = $this->wire->config;
-				return str_replace($config->paths->root, $config->urls->root, $path);
-		}
+    /**
+     * Fetch latest version from registry
+     */
+    public static function getRemoteVersion()
+    {
+        $http = new WireHttp();
+        $json = $http->get('https://registry.npmjs.org/alpinejs/latest');
+        if ($json) {
+            $data = json_decode($json, true);
+            return $data['version'] ?? null;
+        }
+        return null;
+    }
 
-		/**
-		 * Given any file or directory path or url convert it to an absolute path
-		 * @param string $path
-		 * @return string
-		 */
-		public function path($path)
-		{
-				$path = Paths::normalizeSeparators($path);
-				$config = $this->wire->config;
-				if (strpos($path, $config->paths->root) !== 0) {
-						// path is not within pw root
-						// so we assume it is a relative path and add the pw root
-						$url = ltrim($path, "/");
-						$path = $config->paths->root . $url;
-				}
-				return $path;
-		}
+    /**
+     * Download all files locally
+     */
+    public function downloadAlpineFiles($version)
+    {
+        $path = $this->getJsPath();
+        if (!is_dir($path)) {
+            if (!mkdir($path, 0755, true)) {
+                $this->error("Could not create directory: $path");
+                return false;
+            }
+        }
 
-		public function getVersionUrl()
-		{
-				$class = $this->className();
-				$versions_path = "{$this->config->paths->$class}alpinejs/";
-    
-				if (!$this->version) {
-						$files = $this->files->find($versions_path, [
-							'recursive'      => 1,
-							'allowDirs'      => true,
-							'returnRelative' => true
-						]);
-						
-						if (count($files)) {
-								$last_version_directory = end($files);
-								$version_url =  "{$this->config->urls->$class}alpinejs/". $last_version_directory . "alpine.js";
-								return $version_url;
-						}
-				} else {
-						return "{$this->config->urls->$class}alpinejs/{$this->version}/alpine.js";
-				}
-		}
+        $http = new WireHttp();
+        $successCount = 0;
 
+        // 1. Download Core
+        $coreUrl = "https://unpkg.com/alpinejs@{$version}/dist/cdn.min.js";
+        $coreDest = $path . "alpine.min.js";
+        $coreData = $http->get($coreUrl);
+
+        if ($coreData) {
+            if (file_put_contents($coreDest, $coreData))
+                $successCount++;
+        } else {
+            $this->error("Failed to download Core: $coreUrl");
+        }
+
+        // 2. Download ALL Plugins (so they are ready if enabled later)
+        foreach (self::$pluginsList as $name => $filename) {
+            $url = "https://unpkg.com/@alpinejs/{$name}@{$version}/dist/{$filename}";
+            $dest = $path . "alpine-{$name}.min.js";
+            $data = $http->get($url);
+
+            if ($data) {
+                if (file_put_contents($dest, $data))
+                    $successCount++;
+            } else {
+                $this->warning("Failed to download Plugin: $name");
+            }
+        }
+
+        return $successCount > 0;
+    }
+
+    /**
+     * Returns the HTML script tags for manual inclusion in templates
+     */
+    public function renderScripts(array $plugins = [])
+    {
+        $out = '';
+        $v = $this->installedVersion;
+
+        // 1. Load Plugins first
+        foreach ($plugins as $plugin) {
+            $file = "alpine-{$plugin}.min.js";
+            if (file_exists($this->getJsPath() . $file)) {
+                $url = $this->getJsUrl() . $file . "?v=" . $v;
+                $out .= "<script defer src='{$url}'></script>\n";
+            }
+        }
+
+        // 2. Load Core AlpineJS
+        if (file_exists($this->getJsPath() . "alpine.min.js")) {
+            $url = $this->getJsUrl() . "alpine.min.js?v=" . $v;
+            $out .= "<script defer src='{$url}'></script>\n";
+        }
+
+        return $out;
+    }
+
+    /**
+     * Uninstall the module and remove downloaded files
+     */
+    public function ___uninstall()
+    {
+        $path = $this->getJsPath();
+        if (is_dir($path)) {
+            $this->wire('files')->rmdir($path, true);
+            $this->message("Removed AlpineJS files located in $path");
+        }
+    }
 }
