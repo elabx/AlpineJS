@@ -75,9 +75,22 @@ class AlpineJS extends WireData implements Module
         }
 
         // 2. Load Core AlpineJS
-        if (file_exists($this->getJsPath() . "alpine.min.js")) {
-            $this->wire('config')->scripts->add($this->getJsUrl() . "alpine.min.js?v=" . $this->installedVersion);
+        $this->wire('config')->scripts->add($this->getCoreScriptUrl());
+    }
+
+    /**
+     * Returns the URL to the core Alpine.js script.
+     * Hookable — override this to load Alpine.js from a custom location.
+     *
+     * @return string
+     */
+    public function ___getCoreScriptUrl()
+    {
+        if ($this->custom_file) {
+            return $this->wire('config')->urls->root . ltrim($this->custom_file, '/');
         }
+
+        return $this->getJsUrl() . "alpine.min.js?v=" . $this->installedVersion;
     }
 
     /**
@@ -145,9 +158,9 @@ class AlpineJS extends WireData implements Module
     public function renderScripts(array $plugins = [])
     {
         $out = '';
-        $v = $this->installedVersion;
 
         // 1. Load Plugins first
+        $v = $this->installedVersion;
         foreach ($plugins as $plugin) {
             $file = "alpine-{$plugin}.min.js";
             if (file_exists($this->getJsPath() . $file)) {
@@ -157,10 +170,8 @@ class AlpineJS extends WireData implements Module
         }
 
         // 2. Load Core AlpineJS
-        if (file_exists($this->getJsPath() . "alpine.min.js")) {
-            $url = $this->getJsUrl() . "alpine.min.js?v=" . $v;
-            $out .= "<script defer src='{$url}'></script>\n";
-        }
+        $url = $this->getCoreScriptUrl();
+        $out .= "<script defer src='{$url}'></script>\n";
 
         return $out;
     }

@@ -22,6 +22,26 @@ Install the module from the [modules directory](https://modules.processwire.com/
 composer require elabx/processwire-alpinejs
 ```
 
+## Setup
+
+After installing, you need to configure where Alpine.js is loaded from. There are two options:
+
+### Option 1: Download via module settings
+
+Go to **Modules > Configure > AlpineJS** and click the download button. This fetches the latest Alpine.js core and plugins from unpkg.com and stores them locally in the module's `js/` directory.
+
+### Option 2: Custom file path
+
+If you prefer to manage the Alpine.js file yourself (e.g. to version-control it), set the **Custom Alpine.js file path** in the module settings. This should be a path relative to the site root, such as `site/templates/scripts/alpine.js`. When set, this file is used instead of the downloaded version.
+
+You can also override the core script URL programmatically via hook:
+
+```php
+$wire->addHookAfter('AlpineJS::getCoreScriptUrl', function($event) {
+    $event->return = '/site/templates/scripts/alpine.js';
+});
+```
+
 ## Usage
 
 ### Admin Backend
@@ -38,5 +58,4 @@ echo $modules->get('AlpineJS')->renderScripts();
 
 // Load Alpine Core + Plugins
 echo $modules->get('AlpineJS')->renderScripts(['intersect', 'persist']);
-
 ```

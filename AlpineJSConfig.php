@@ -8,6 +8,7 @@ class AlpineJSConfig extends ModuleConfig
         $this->add([
             'activePlugins' => [],
             'installedVersion' => '0.0.0', // Tracks the local file version
+            'custom_file' => '',
         ]);
     }
 
@@ -71,6 +72,14 @@ class AlpineJSConfig extends ModuleConfig
         $fs = $modules->get('InputfieldFieldset');
         $fs->label = __('Settings');
         $fs->icon = 'sliders';
+
+        $f = $modules->get('InputfieldText');
+        $f->attr('name', 'custom_file');
+        $f->label = __('Custom Alpine.js file path');
+        $f->description = __('Path to an Alpine.js file relative to the site root. When set, the downloaded version above is ignored.');
+        $f->attr('value', $this->custom_file);
+        $f->collapsed = $this->custom_file ? Inputfield::collapsedNo : Inputfield::collapsedBlank;
+        $fs->add($f);
 
         $f = $modules->get('InputfieldCheckboxes');
         $f->attr('name', 'activePlugins');
