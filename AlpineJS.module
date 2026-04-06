@@ -61,21 +61,34 @@ class AlpineJS extends WireData implements Module
 
     /**
      * Add scripts to ProcessWire Admin
+     *
+     * Uses deferred script tags in <head> so that Alpine initializes AFTER
+     * all body scripts (e.g. Inputfield JS) have registered their
+     * alpine:init listeners.
      */
     protected function addScriptsToAdmin()
     {
-        // 1. Load Plugins first
+        $tags = '';
+        $v = $this->installedVersion;
+
+        // 1. Plugin scripts first (must load before core)
         if (is_array($this->activePlugins)) {
             foreach ($this->activePlugins as $plugin) {
                 $file = "alpine-{$plugin}.min.js";
                 if (file_exists($this->getJsPath() . $file)) {
-                    $this->wire('config')->scripts->add($this->getJsUrl() . $file . "?v=" . $this->installedVersion);
+                    $url = $this->getJsUrl() . $file . "?v=" . $v;
+                    $tags .= "<script defer src='{$url}'></script>\n";
                 }
             }
         }
 
-        // 2. Load Core AlpineJS
-        $this->wire('config')->scripts->add($this->getCoreScriptUrl());
+        // 2. Core AlpineJS
+        $tags .= "<script defer src='{$this->getCoreScriptUrl()}'></script>\n";
+
+        // Inject as <script defer> in <head>. Deferred head scripts execute
+        // after all synchronous body scripts, guaranteeing that alpine:init
+        // listeners are already registered when Alpine starts.
+        $this->wire()->adminTheme->addExtraMarkup('head', $tags);
     }
 
     /**
