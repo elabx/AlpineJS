@@ -12,7 +12,7 @@ class AlpineJS extends WireData implements Module
         return [
             'title' => 'AlpineJS',
             'summary' => 'Integrates Alpine.js locally into ProcessWire Admin with 1-click updates.',
-            'version' => '006',
+            'version' => '007',
             'author' => 'elabx',
             'href' => 'https://github.com/elabx/AlpineJS',
             'autoload' => true,
