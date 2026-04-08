@@ -12,7 +12,7 @@ class AlpineJS extends WireData implements Module
         return [
             'title' => 'AlpineJS',
             'summary' => 'Integrates Alpine.js locally into ProcessWire Admin with 1-click updates.',
-            'version' => '006',
+            'version' => '007',
             'author' => 'elabx',
             'href' => 'https://github.com/elabx/AlpineJS',
             'autoload' => true,
@@ -68,6 +68,20 @@ class AlpineJS extends WireData implements Module
      */
     protected function addScriptsToAdmin()
     {
+        // Warn superusers if AlpineJS has not been configured yet:
+        // no custom file set AND no downloaded core file present.
+        if (!$this->custom_file && !file_exists($this->getJsPath() . 'alpine.min.js')) {
+            if ($this->wire('user')->isSuperuser()) {
+                $configUrl = $this->wire('config')->urls->admin . 'module/edit?name=AlpineJS';
+                $this->warning(
+                    __('AlpineJS module still needs configuration: download the library or set a custom file path.') .
+                    " <a href='{$configUrl}'>" . __('Configure') . "</a>",
+                    Notice::allowMarkup
+                );
+            }
+            return;
+        }
+
         $tags = '';
         $v = $this->installedVersion;
 
